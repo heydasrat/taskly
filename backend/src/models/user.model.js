@@ -48,34 +48,28 @@ const userSchema = new mongoose.Schema(
         avatar: {
             url: {
                 type: String,
-                default:""
+                default: ""
             },
             public_id: {
                 type: String,
-                default:""
+                default: ""
             }
         },
-        role:{
-            type:String,
-            enum:["user","admin"],
-            default:"user",
-        },
+        // role:{
+        //     type:String,
+        //     enum:["user","admin"],
+        //     default:"user",
+        // },
 
-        coverImage: {
-            url: {
-                type: String,
-                // required: true
-            },
-            public_id: {
-                type: String,
-                // required: true
-            }
-        },
 
         refreshToken: {
             type: String,
             default: null,
         },
+        isVerified: {
+            type: Boolean,
+            default: false
+        }
     },
     {
         timestamps: true,

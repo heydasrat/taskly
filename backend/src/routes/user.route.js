@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { register, login, logout,getCurrentUser } from "../controllers/user.controller.js";
+import { register, login, logout,getCurrentUser,verifyEmail } from "../controllers/user.controller.js";
 import upload from "../middlewares/multer.middleware.js";
 import verifyJWT from "../middlewares/auth.middleware.js";
 
@@ -13,6 +13,7 @@ router.route("/register").post(upload.fields([
         maxCount: 1
     }
 ]), register)
+router.route("/verify-email").post(verifyEmail)
 
 router.route("/login").post(login)
 router.route("/logout").post(verifyJWT, logout)
