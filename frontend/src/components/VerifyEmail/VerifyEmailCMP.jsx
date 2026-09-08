@@ -104,7 +104,7 @@ const VerifyEmailCMP = () => {
       const response = await api.post("/auth/verify-email", { email, otp: code });
       if (response.data.success) {
         try {
-          const response = await api.post("/auth/login", { identifier:email, password })
+          const response = await api.post("/auth/login", { identifier: email, password })
           if (response.data.success) {
             dispatch(login(response.data.data))
           }
@@ -113,9 +113,9 @@ const VerifyEmailCMP = () => {
         }
       }
 
-      
 
-    
+
+
 
     } catch (error) {
       setError(
@@ -126,6 +126,18 @@ const VerifyEmailCMP = () => {
       setFetching(false);
     }
   };
+
+  const handleResendOTP = async (e) => {
+    e.preventDefault()
+    try {
+      const response = await api.post("/auth/resend-otp", { email });
+      if (response.data.success) {
+        setError(response.data.message)
+      }
+    } catch (error) {
+      setError(error.response.data.message)
+    }
+  }
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-50 px-4">
@@ -193,10 +205,7 @@ const VerifyEmailCMP = () => {
             <button
               type="button"
               className="text-blue-600 font-medium hover:underline"
-              onClick={() => {
-                // Add resend API here
-                console.log("Resend verification code");
-              }}
+              onClick={handleResendOTP}
             >
               Resend code
             </button>

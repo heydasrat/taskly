@@ -86,7 +86,7 @@ const register = asyncHandler(async (req, res) => {
         password
     });
 
-    // Remove any previous OTP for this email
+
     await OTP.deleteMany({
         email: normalizedEmail
     });
@@ -334,7 +334,7 @@ const verifyPasswordResetOtp = asyncHandler(async (req, res) => {
 
     const resetToken = generatePasswordResetToken(user._id);
 
-    
+
     await OTP.deleteOne({ _id: OTPDoc._id });
 
     return res.status(200).json(
@@ -411,6 +411,39 @@ const resetPassword = asyncHandler(async (req, res) => {
     );
 });
 
+const resendOTP = asyncHandler(async (req, res) => {
+    const { email } = req.body;
+
+    if (!email) {
+        throw new ApiError(400, "Invalid Email")
+    };
+
+    await OTP.deleteMany({
+        email: email
+    });
+
+    const otp = generateOTP();
+
+    await OTP.create({
+        email: email,
+        otp: otp.toString(),
+        expiresAt: new Date(Date.now() + 10 * 60 * 1000)
+    });
+
+    await sendEmail(
+        email,
+        "Verify Your Email — Taskly",
+        `Your Taskly verification code is ${otp}. This code will expire in 10 minutes.`,
+        OTPHTML(otp)
+    );
+
+    return res.status(200).json(
+        new ApiResponse(200, {}, "OTP Sent Successfully")
+    )
+
+
+})
+
 export {
     register,
     verifyEmail,
@@ -419,5 +452,6 @@ export {
     getCurrentUser,
     requestPasswordReset,
     verifyPasswordResetOtp,
-    resetPassword
+    resetPassword,
+    resendOTP
 } 
