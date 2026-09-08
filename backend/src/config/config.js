@@ -56,7 +56,9 @@ const config = {
   googleClientId: process.env.GOOGLE_CLIENT_ID,
   googleClientSecret: process.env.GOOGLE_CLIENT_SECRET,
   googleRefreshToken: process.env.GOOGLE_REFRESH_TOKEN,
-  googleUserEmail: process.env.EMAIL_USER
+  googleUserEmail: process.env.EMAIL_USER,
+  passwordResetToken:process.env.RESET_PASSWORD_TOKEN,
+  passwordResetTokenExpiry:process.env.RESET_PASSWORD_TOKEN_EXPIRY
 };
 
 export default config;
