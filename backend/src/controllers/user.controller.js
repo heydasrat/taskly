@@ -8,6 +8,7 @@ import { OTPHTML, generateOTP } from '../utils/otp.utils.js'
 import OTP from '../models/otp.model.js'
 import jwt from 'jsonwebtoken'
 import config from '../config/config.js'
+import PasswordReset from '../models/PasswordReset.model.js'
 
 const options = {
     secure: true,
@@ -331,10 +332,9 @@ const verifyPasswordResetOtp = asyncHandler(async (req, res) => {
         throw new ApiError(400, "OTP has expired");
     }
 
-    // OTP is correct → create temporary reset authorization
     const resetToken = generatePasswordResetToken(user._id);
 
-    // Make OTP single-use
+    
     await OTP.deleteOne({ _id: OTPDoc._id });
 
     return res.status(200).json(

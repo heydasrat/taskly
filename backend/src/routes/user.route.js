@@ -24,6 +24,6 @@ router.route("/logout").post(verifyJWT, logout)
 router.route("/me").get(verifyJWT, getCurrentUser)
 router.route("/request-password-reset").post(requestPasswordReset)
 router.route("/verify-otp").post(verifyPasswordResetOtp)
-router.route("/change-forget-password").patch(resetPassword)
+router.route("/reset-password").patch(resetPassword)
 
 export default router
