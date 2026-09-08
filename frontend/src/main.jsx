@@ -4,7 +4,7 @@ import App from './App.jsx'
 import { Provider } from 'react-redux'
 import store from './app/store/store.js'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
-import { Login, Register, Home,Setting } from './Pages/index.js'
+import { Login, Register, Home,Setting,VerifyEmail } from './Pages/index.js'
 import { ProtectedRoutes, PublicRoutes, AuthRoutes } from './routes/index.js'
 
 
@@ -18,6 +18,7 @@ const router = createBrowserRouter([
         children: [
           { path: "register", element: <Register /> },
           { path: "login", element: <Login /> },
+          {path:"/verify-email",element:<VerifyEmail/>}
         ]
       },
       {

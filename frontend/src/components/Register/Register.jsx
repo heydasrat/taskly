@@ -4,6 +4,7 @@ import ErrorMessage from '../Error/Error.jsx'
 import api from '../Axios/Axios.js'
 import { useDispatch } from 'react-redux'
 import { login, logout, } from '../../app/features/authSlice.js'
+import { useNavigate } from 'react-router-dom'
 
 const RegisterCMP = () => {
   const [fullName, setFullName] = useState("")
@@ -14,6 +15,7 @@ const RegisterCMP = () => {
   const [fetching, setFetching] = useState(false)
 
   const dispatch = useDispatch()
+  const navigate = useNavigate()
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -29,21 +31,7 @@ const RegisterCMP = () => {
     try {
       const response = await api.post("/auth/register", { fullName, email, username, password });
       if (response.data.success) {
-        try {
-          const response = await api.post("/auth/login", { identifier: email, password })
-          if (response.data.success) {
-
-            dispatch(login(response.data.data))
-          } else {
-
-            setError(error.response.data.message)
-            dispatch(logout())
-          }
-        } catch (error) {
-
-          setError(error.response.data.message)
-          dispatch(logout())
-        }
+       navigate("/verify-email",{state:{email,password}})
       }
     } catch (error) {
 
