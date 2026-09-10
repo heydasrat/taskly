@@ -6,6 +6,7 @@ import store from './app/store/store.js'
 import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import { Login, Register, Home, Setting, VerifyEmail,ForgotPassword, VerifyOTP,ResetPassword } from './Pages/index.js'
 import { ProtectedRoutes, PublicRoutes, AuthRoutes } from './routes/index.js'
+import { GoogleOAuthProvider } from '@react-oauth/google'
 
 
 const router = createBrowserRouter([
@@ -45,6 +46,8 @@ const router = createBrowserRouter([
 
 createRoot(document.getElementById('root')).render(
   <Provider store={store}>
+    <GoogleOAuthProvider clientId='486340025147-et2eacvhdad5d20ddfjckfdf5b8l1abr.apps.googleusercontent.com'>
     <RouterProvider router={router} />
+    </GoogleOAuthProvider>
   </Provider>
 )

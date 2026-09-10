@@ -1,23 +1,24 @@
 import api from '../Axios/Axios'
 import { useDispatch, useSelector } from 'react-redux'
 import { setLoading, removeTodo, updateTodo, toggleTodo } from '../../app/features/todoSlice'
-import  { useState,useEffect } from 'react'
-import { X, ListPlus } from 'lucide-react'
+import { useState } from 'react'
+import { X, ListPlus, Search } from 'lucide-react'
 import TodoCard from '../TodoCard/TodoCard'
+import { useEffect } from 'react'
 
 const TodoContent = () => {
 
-    
-   
-
+    const { todos } = useSelector((state) => state.todo)
 
     const dispatch = useDispatch()
     const [showEditTodo, setShowEditTodo] = useState(false)
     const [editTitle, setEditTitle] = useState('')
     const [editDescription, setEditDescription] = useState('')
     const [selectedTodo, setSelectedTodo] = useState(null)
-    
-    
+
+    const [search, setSearch] = useState('')
+
+
 
 
     const handleDelete = async (id) => {
@@ -56,6 +57,11 @@ const TodoContent = () => {
             dispatch(setLoading(false))
         }
     }
+
+    const filteredTodos = todos.filter((todo) =>
+        todo.title.toLowerCase().includes(search.toLowerCase()) ||
+        todo.description?.toLowerCase().includes(search.toLowerCase())
+    )
 
 
 
@@ -98,9 +104,19 @@ const TodoContent = () => {
 
     return (
         <div className="w-full flex justify-center">
-            <div className="w-[50em] bg-[#f8f9ff] rounded-2xl p-4">
 
+            <div className="w-[50em] bg-[#f8f9ff] rounded-2xl p-4">
+                <div className="mb-5">
+                    <input
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        type="text"
+                        placeholder="Search your todos..."
+                        className="w-full h-12 px-4 rounded-lg border border-gray-200 bg-white outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 transition"
+                    />
+                </div>
                 <TodoCard
+                    filteredTodosArray={filteredTodos}
 
                     onEdit={(todo) => {
                         handleEdit(todo)
@@ -115,6 +131,7 @@ const TodoContent = () => {
                     }}
 
                 />
+
 
                 {showEditTodo && (
                     <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50">

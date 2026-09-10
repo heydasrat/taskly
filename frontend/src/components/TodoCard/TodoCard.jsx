@@ -2,8 +2,10 @@ import React from 'react'
 import { Check, Pencil, Trash2 } from 'lucide-react'
 import { useSelector } from 'react-redux'
 
-const TodoCard = ({ onEdit, onDelete, onToggle }) => {
+const TodoCard = ({ filteredTodosArray, onEdit, onDelete, onToggle }) => {
     const { todos, isLoading } = useSelector((state) => state.todo)
+
+    const filteredTodosArr = filteredTodosArray ?? todos
 
     if (isLoading) {
         return (
@@ -39,9 +41,23 @@ const TodoCard = ({ onEdit, onDelete, onToggle }) => {
         )
     }
 
+    if (filteredTodosArr.length === 0) {
+        return (
+            <div className="w-full max-w-[47em] py-16 text-center">
+                <h3 className="text-lg font-semibold text-gray-900">
+                    No todos found
+                </h3>
+
+                <p className="mt-1 text-sm text-gray-500">
+                    Try searching with a different title.
+                </p>
+            </div>
+        )
+    }
+
     return (
         <div className="w-full max-w-[47em] space-y-3">
-            {todos.map((todo) => (
+            {filteredTodosArr.map((todo) => (
                 <div
                     key={todo._id}
                     className={`
@@ -50,13 +66,13 @@ const TodoCard = ({ onEdit, onDelete, onToggle }) => {
                         flex items-center gap-4
                         transition-all duration-200
                         hover:shadow-md
-                        ${todo.isCompleted
-                            ? 'border-gray-200 bg-gray-50/70'
-                            : 'border-gray-200 hover:border-indigo-200'
+                        ${
+                            todo.isCompleted
+                                ? 'border-gray-200 bg-gray-50/70'
+                                : 'border-gray-200 hover:border-indigo-200'
                         }
                     `}
                 >
-                   
                     <button
                         type="button"
                         onClick={() => onToggle?.(todo._id)}
@@ -69,9 +85,10 @@ const TodoCard = ({ onEdit, onDelete, onToggle }) => {
                             shrink-0 w-6 h-6 rounded-full
                             border-2 flex items-center justify-center
                             transition-all duration-200
-                            ${todo.isCompleted
-                                ? 'bg-indigo-600 border-indigo-600'
-                                : 'border-gray-300 hover:border-indigo-500'
+                            ${
+                                todo.isCompleted
+                                    ? 'bg-indigo-600 border-indigo-600'
+                                    : 'border-gray-300 hover:border-indigo-500'
                             }
                         `}
                     >
@@ -84,14 +101,14 @@ const TodoCard = ({ onEdit, onDelete, onToggle }) => {
                         )}
                     </button>
 
-                    {/* Todo content */}
                     <div className="min-w-0 flex-1">
                         <h3
                             className={`
                                 text-[15px] font-semibold truncate
-                                ${todo.isCompleted
-                                    ? 'text-gray-400 line-through'
-                                    : 'text-gray-900'
+                                ${
+                                    todo.isCompleted
+                                        ? 'text-gray-400 line-through'
+                                        : 'text-gray-900'
                                 }
                             `}
                         >
@@ -102,9 +119,10 @@ const TodoCard = ({ onEdit, onDelete, onToggle }) => {
                             <p
                                 className={`
                                     mt-1 text-sm line-clamp-2
-                                    ${todo.isCompleted
-                                        ? 'text-gray-400'
-                                        : 'text-gray-500'
+                                    ${
+                                        todo.isCompleted
+                                            ? 'text-gray-400'
+                                            : 'text-gray-500'
                                     }
                                 `}
                             >
@@ -113,7 +131,6 @@ const TodoCard = ({ onEdit, onDelete, onToggle }) => {
                         )}
                     </div>
 
-                    
                     <div className="shrink-0 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                         <button
                             type="button"
@@ -154,4 +171,3 @@ const TodoCard = ({ onEdit, onDelete, onToggle }) => {
 }
 
 export default TodoCard
-

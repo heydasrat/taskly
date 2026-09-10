@@ -122,7 +122,33 @@ const changePassword = asyncHandler(async (req, res) => {
     )
 })
 
+
+const deleteAvatar = asyncHandler(async (req, res) => {
+    const user = await User.findById({_id:req.user._id,isVerified:true});
+
+    if (!user) {
+        throw new ApiError(404, "User not found!")
+    }
+
+   
+
+    if (user.avatar.public_id) {
+        user.avatar.url = null,
+            user.avatar.public_id = null
+
+        await user.save();
+        return res.status(200).json(
+            new ApiResponse(200, user, "Avatar removed successfully")
+        )
+    }
+
+    return res.status(200).json(
+        new ApiResponse(200, {}, "Avatar not found.")
+    )
+})
+
 export {
     changePassword,
-    updateProfile
+    updateProfile,
+    deleteAvatar
 }
