@@ -34,20 +34,9 @@ const LoginCMP = () => {
     return Object.keys(errors).length === 0
   }
 
-  const googleResponse = (authResponse) => {
-    try {
-      console.log(authResponse)
-      console.log(authResponse.code)
-    } catch (error) {
-      console.log(error)
-    }
-  }
 
-  const handleGoogleLogin = useGoogleLogin({
-    flow: "auth-code",
-    onSuccess: googleResponse,
-    onError: googleResponse
-  })
+
+
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -106,7 +95,7 @@ const LoginCMP = () => {
 
             <div className="grid grid-cols-2 gap-2 mb-5 mt-2">
               <button
-                onClick={handleGoogleLogin}
+                
                 type="button"
                 className="flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg border border-slate-200 bg-white hover:bg-slate-50 active:bg-slate-100 text-sm font-medium text-slate-700 transition-colors"
               >

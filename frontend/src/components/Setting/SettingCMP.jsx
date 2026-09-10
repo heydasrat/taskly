@@ -9,11 +9,12 @@ import {
   Check,
   AlertCircle,
   Loader2,
+  Trash
 } from "lucide-react"
 import Navbar from "../NavBar/Navbar.jsx"
 import api from "../Axios/Axios.js"
 import { useSelector, useDispatch } from "react-redux"
-import { login } from "../../app/features/authSlice.js"
+import { login, updateAvatar } from "../../app/features/authSlice.js"
 
 const SettingCMP = () => {
   const dispatch = useDispatch()
@@ -48,13 +49,20 @@ const SettingCMP = () => {
   const [passwordSuccess, setPasswordSuccess] = useState("")
   const [passwordLoading, setPasswordLoading] = useState(false)
 
+  const [showDeleteAvatar, setShowDeleteAvatar] = useState(false)
+  const [startDeletingAvatar, setStartDeletingAvatar] = useState(false);
+
 
 
   useEffect(() => {
     if (!user) return
 
-    setUsername(user.username || "")
-    setFullName(user.fullName || "")
+    setUsername(user.username || "");
+    setFullName(user.fullName || "");
+
+    if (user.avatar.url) {
+      setShowDeleteAvatar(true)
+    }
   }, [user])
 
 
@@ -120,7 +128,7 @@ const SettingCMP = () => {
     setProfileLoading(true)
 
     try {
-      // FormData because avatar is a file
+
       const formData = new FormData()
 
       formData.append("username", username.trim())
@@ -245,6 +253,21 @@ const SettingCMP = () => {
     }
   }
 
+  const handleDeleteAvatar = async (e) => {
+    e.preventDefault()
+    try {
+      setStartDeletingAvatar(true)
+      const response = await api.patch("/user/delete-avatar", {}, { withCredentials: true })
+      if (response.data.success) {
+        dispatch(updateAvatar(""))
+      }
+    } catch (error) {
+
+    } finally {
+      setShowDeleteAvatar(false)
+    }
+  }
+
 
 
   const initials =
@@ -257,9 +280,7 @@ const SettingCMP = () => {
       .substring(0, 2)
       .toUpperCase() || "U"
 
-  // =========================
-  // RENDER
-  // =========================
+
 
   return (
     <>
@@ -404,6 +425,17 @@ const SettingCMP = () => {
                           Change photo
 
                         </label>
+                        {showDeleteAvatar ? <label
+                          onClick={handleDeleteAvatar}
+                          disabled={startDeletingAvatar}
+                          className="inline-flex items-center gap-2 px-3.5 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition shadow-sm cursor-pointer"
+                        >
+
+                          <Trash className="w-4 h-4 text-gray-500" />
+
+                          Remove photo
+
+                        </label> : null}
 
 
                         {avatarFile && (
