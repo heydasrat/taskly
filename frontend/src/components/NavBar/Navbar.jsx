@@ -4,7 +4,8 @@ import {
     LogOut,
     ChevronDown,
     Settings,
-    User
+    User,
+    MessageSquare
 } from "lucide-react"
 import { useSelector, useDispatch } from "react-redux"
 import api from "../Axios/Axios.js"
@@ -85,19 +86,17 @@ const Navbar = () => {
                             <img
                                 src={user.avatar.url}
                                 alt="Profile"
-                                className={`h-9 w-9 rounded-full object-cover ring-2 ${
-                                    isDark
-                                        ? "ring-slate-700"
-                                        : "ring-slate-100"
-                                }`}
+                                className={`h-9 w-9 rounded-full object-cover ring-2 ${isDark
+                                    ? "ring-slate-700"
+                                    : "ring-slate-100"
+                                    }`}
                             />
                         ) : (
                             <div
-                                className={`flex h-9 w-9 items-center justify-center rounded-full ${
-                                    isDark
-                                        ? "bg-[#20252b] text-slate-300"
-                                        : "bg-slate-100 text-slate-600"
-                                }`}
+                                className={`flex h-9 w-9 items-center justify-center rounded-full ${isDark
+                                    ? "bg-[#20252b] text-slate-300"
+                                    : "bg-slate-100 text-slate-600"
+                                    }`}
                             >
                                 <User size={18} strokeWidth={2} />
                             </div>
@@ -122,9 +121,8 @@ const Navbar = () => {
                         <ChevronDown
                             size={16}
                             strokeWidth={2}
-                            className={`ml-0.5 transition-transform duration-200 ${mutedClass} ${
-                                showMenu ? "rotate-180" : ""
-                            }`}
+                            className={`ml-0.5 transition-transform duration-200 ${mutedClass} ${showMenu ? "rotate-180" : ""
+                                }`}
                         />
                     </button>
 
@@ -133,11 +131,10 @@ const Navbar = () => {
                             className={`absolute right-0 top-[calc(100%+10px)] w-56 overflow-hidden rounded-xl border p-1.5 shadow-xl ${menuClass}`}
                         >
                             <div
-                                className={`px-3 py-2.5 mb-1 ${
-                                    isDark
-                                        ? "border-b border-slate-800"
-                                        : "border-b border-slate-100"
-                                }`}
+                                className={`px-3 py-2.5 mb-1 ${isDark
+                                    ? "border-b border-slate-800"
+                                    : "border-b border-slate-100"
+                                    }`}
                             >
                                 <p
                                     className={`text-sm font-medium truncate ${textClass}`}
@@ -157,11 +154,10 @@ const Navbar = () => {
                             <Link
                                 to="/setting"
                                 onClick={() => setShowMenu(false)}
-                                className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
-                                    isDark
-                                        ? "text-slate-300 hover:bg-[#20252b] hover:text-white"
-                                        : "text-slate-700 hover:bg-slate-100"
-                                }`}
+                                className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${isDark
+                                    ? "text-slate-300 hover:bg-[#20252b] hover:text-white"
+                                    : "text-slate-700 hover:bg-slate-100"
+                                    }`}
                             >
                                 <Settings
                                     size={17}
@@ -172,21 +168,41 @@ const Navbar = () => {
                             </Link>
 
                             <div
-                                className={`my-1 h-px ${
-                                    isDark
-                                        ? "bg-slate-800"
-                                        : "bg-slate-100"
-                                }`}
+                                className={`my-1 h-px ${isDark
+                                    ? "bg-slate-800"
+                                    : "bg-slate-100"
+                                    }`}
                             />
+
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    setShowMenu(false)
+                                    window.open(
+                                        "https://forms.google.com/your-feedback-form",
+                                        "_blank",
+                                        "noopener,noreferrer"
+                                    )
+                                }}
+                                className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${isDark
+                                        ? "text-slate-300 hover:bg-[#20252b] hover:text-white"
+                                        : "text-slate-700 hover:bg-slate-100"
+                                    }`}
+                            >
+                                <MessageSquare
+                                    size={17}
+                                    strokeWidth={2}
+                                />
+                                <span>Give Feedback</span>
+                            </button>
 
                             <button
                                 onClick={handleLogout}
                                 type="button"
-                                className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
-                                    isDark
-                                        ? "text-slate-400 hover:bg-red-500/10 hover:text-red-400"
-                                        : "text-slate-600 hover:bg-red-50 hover:text-red-600"
-                                }`}
+                                className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${isDark
+                                    ? "text-slate-400 hover:bg-red-500/10 hover:text-red-400"
+                                    : "text-slate-600 hover:bg-red-50 hover:text-red-600"
+                                    }`}
                             >
                                 <LogOut
                                     size={17}

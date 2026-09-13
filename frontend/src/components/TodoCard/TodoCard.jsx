@@ -81,6 +81,23 @@ const TodoCard = ({
     if (filteredTodosArr.length === 0) {
         return (
             <div className="w-full py-16 text-center">
+                <div
+                    className={`w-12 h-12 mx-auto mb-4 rounded-full flex items-center justify-center ${
+                        isDark
+                            ? "bg-slate-800"
+                            : "bg-slate-100"
+                    }`}
+                >
+                    <Check
+                        size={22}
+                        className={
+                            isDark
+                                ? "text-slate-500"
+                                : "text-slate-400"
+                        }
+                    />
+                </div>
+
                 <h3
                     className={`text-lg font-semibold ${
                         isDark
@@ -98,7 +115,7 @@ const TodoCard = ({
                             : "text-slate-500"
                     }`}
                 >
-                    Try searching with a different title.
+                    Try changing your search or filter.
                 </p>
             </div>
         )
@@ -210,4 +227,3 @@ const TodoCard = ({
 }
 
 export default TodoCard
-

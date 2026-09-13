@@ -11,7 +11,8 @@ import {
   Loader2,
   Trash,
   Sun,
-  Moon
+  Moon,
+  MessageSquare
 } from "lucide-react"
 import Navbar from "../NavBar/Navbar.jsx"
 import api from "../Axios/Axios.js"
@@ -126,7 +127,7 @@ const SettingCMP = () => {
       setTheme(previousTheme)
       setThemeError(
         error.response?.data?.message ||
-          "Unable to change theme. Please try again."
+        "Unable to change theme. Please try again."
       )
     }
   }
@@ -240,7 +241,7 @@ const SettingCMP = () => {
 
       setProfileError(
         error.response?.data?.message ||
-          "Failed to update profile."
+        "Failed to update profile."
       )
     } finally {
       setProfileLoading(false)
@@ -285,7 +286,7 @@ const SettingCMP = () => {
       if (response.data?.success) {
         setPasswordSuccess(
           response.data?.message ||
-            "Password changed successfully."
+          "Password changed successfully."
         )
 
         setOldPassword("")
@@ -299,13 +300,13 @@ const SettingCMP = () => {
       } else {
         setPasswordError(
           response.data?.message ||
-            "Failed to change password."
+          "Failed to change password."
         )
       }
     } catch (error) {
       setPasswordError(
         error.response?.data?.message ||
-          "Failed to change password."
+        "Failed to change password."
       )
     } finally {
       setPasswordLoading(false)
@@ -365,6 +366,10 @@ const SettingCMP = () => {
             </p>
           </div>
 
+
+
+
+
           <div className="space-y-6">
             <section
               className={`rounded-2xl border shadow-sm p-6 sm:p-8 transition-colors ${cardClass}`}
@@ -419,42 +424,38 @@ const SettingCMP = () => {
                       onClick={() =>
                         handleChangeTheme(item.value)
                       }
-                      className={`text-left rounded-xl p-5 border transition-all ${
-                        selected
+                      className={`text-left rounded-xl p-5 border transition-all ${selected
                           ? isDark
                             ? "border-blue-500 bg-blue-500/10"
                             : "border-blue-600 bg-blue-50"
                           : isDark
                             ? "border-slate-700 bg-[#20252b] hover:border-slate-600 hover:bg-[#252b32]"
                             : "border-slate-200 bg-slate-50 hover:border-slate-300 hover:bg-slate-100"
-                      }`}
+                        }`}
                     >
                       <div className="flex items-center justify-between mb-5">
                         <div
-                          className={`flex h-11 w-11 items-center justify-center rounded-lg border shadow-sm ${
-                            isDark
+                          className={`flex h-11 w-11 items-center justify-center rounded-lg border shadow-sm ${isDark
                               ? "bg-[#181c21] border-slate-700"
                               : "bg-white border-slate-200"
-                          }`}
+                            }`}
                         >
                           <Icon
-                            className={`w-5 h-5 ${
-                              selected
+                            className={`w-5 h-5 ${selected
                                 ? "text-blue-500"
                                 : mutedClass
-                            }`}
+                              }`}
                             strokeWidth={2}
                           />
                         </div>
 
                         <div
-                          className={`h-5 w-5 rounded-full ${
-                            selected
+                          className={`h-5 w-5 rounded-full ${selected
                               ? "bg-white border-[5px] border-blue-600"
                               : isDark
                                 ? "bg-transparent border-2 border-slate-600"
                                 : "bg-white border-2 border-slate-300"
-                          }`}
+                            }`}
                         />
                       </div>
 
@@ -478,6 +479,32 @@ const SettingCMP = () => {
             <section
               className={`rounded-2xl border shadow-sm p-6 sm:p-8 transition-colors ${cardClass}`}
             >
+              <div>
+                <h2 className={`text-lg font-semibold ${headingClass}`}>
+                  Help & Feedback
+                </h2>
+
+                <p className={`text-sm mt-1 ${mutedClass}`}>
+                  Have a suggestion or found an issue? Let us know.
+                </p>
+              </div>
+
+              <div className="mt-6">
+                <a
+                  href="https://forms.google.com/your-feedback-form"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-lg shadow-sm transition"
+                >
+                  <MessageSquare className="w-4 h-4" />
+                  Give Feedback
+                </a>
+              </div>
+            </section>
+
+            <section
+              className={`rounded-2xl border shadow-sm p-6 sm:p-8 transition-colors ${cardClass}`}
+            >
               <div
                 className={`border-b pb-5 mb-6 ${borderClass}`}
               >
@@ -495,11 +522,10 @@ const SettingCMP = () => {
 
               {profileError && (
                 <div
-                  className={`mb-6 rounded-lg p-3.5 text-sm flex items-start gap-3 ${
-                    isDark
+                  className={`mb-6 rounded-lg p-3.5 text-sm flex items-start gap-3 ${isDark
                       ? "bg-red-500/10 border border-red-500/20 text-red-400"
                       : "bg-red-50 border border-red-200 text-red-700"
-                  }`}
+                    }`}
                 >
                   <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
                   <span className="font-medium">
@@ -510,11 +536,10 @@ const SettingCMP = () => {
 
               {profileSuccess && (
                 <div
-                  className={`mb-6 rounded-lg p-3.5 text-sm flex items-center gap-3 ${
-                    isDark
+                  className={`mb-6 rounded-lg p-3.5 text-sm flex items-center gap-3 ${isDark
                       ? "bg-emerald-500/10 border border-emerald-500/20 text-emerald-400"
                       : "bg-emerald-50 border border-emerald-200 text-emerald-700"
-                  }`}
+                    }`}
                 >
                   <Check className="w-5 h-5" />
                   <span className="font-medium">
@@ -522,6 +547,8 @@ const SettingCMP = () => {
                   </span>
                 </div>
               )}
+
+
 
               <form onSubmit={handleProfileSubmit}>
                 <div className="mb-7">
@@ -533,11 +560,10 @@ const SettingCMP = () => {
 
                   <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
                     <div
-                      className={`w-20 h-20 rounded-full border-2 overflow-hidden flex items-center justify-center shadow-inner ${
-                        isDark
+                      className={`w-20 h-20 rounded-full border-2 overflow-hidden flex items-center justify-center shadow-inner ${isDark
                           ? "border-slate-700 bg-[#20252b]"
                           : "border-slate-200 bg-slate-100"
-                      }`}
+                        }`}
                     >
                       {avatarPreview ? (
                         <img
@@ -553,11 +579,10 @@ const SettingCMP = () => {
                         />
                       ) : (
                         <span
-                          className={`text-xl font-semibold tracking-wider ${
-                            isDark
+                          className={`text-xl font-semibold tracking-wider ${isDark
                               ? "text-slate-300"
                               : "text-slate-700"
-                          }`}
+                            }`}
                         >
                           {initials}
                         </span>
@@ -605,11 +630,10 @@ const SettingCMP = () => {
                           <button
                             type="button"
                             onClick={handleRemoveAvatar}
-                            className={`inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-lg transition ${
-                              isDark
+                            className={`inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium rounded-lg transition ${isDark
                                 ? "text-slate-400 hover:text-red-400 hover:bg-red-500/10"
                                 : "text-slate-600 hover:text-red-600 hover:bg-red-50"
-                            }`}
+                              }`}
                           >
                             Cancel selection
                           </button>
@@ -618,11 +642,10 @@ const SettingCMP = () => {
 
                       <p className={`text-xs ${mutedClass}`}>
                         <span
-                          className={`font-medium ${
-                            isDark
+                          className={`font-medium ${isDark
                               ? "text-slate-300"
                               : "text-slate-600"
-                          }`}
+                            }`}
                         >
                           JPEG images only.
                         </span>{" "}
@@ -720,11 +743,10 @@ const SettingCMP = () => {
 
               {passwordError && (
                 <div
-                  className={`mb-6 rounded-lg p-3.5 text-sm flex items-start gap-3 ${
-                    isDark
+                  className={`mb-6 rounded-lg p-3.5 text-sm flex items-start gap-3 ${isDark
                       ? "bg-red-500/10 border border-red-500/20 text-red-400"
                       : "bg-red-50 border border-red-200 text-red-700"
-                  }`}
+                    }`}
                 >
                   <AlertCircle className="w-5 h-5 flex-shrink-0 mt-0.5" />
 
@@ -736,11 +758,10 @@ const SettingCMP = () => {
 
               {passwordSuccess && (
                 <div
-                  className={`mb-6 rounded-lg p-3.5 text-sm flex items-center gap-3 ${
-                    isDark
+                  className={`mb-6 rounded-lg p-3.5 text-sm flex items-center gap-3 ${isDark
                       ? "bg-emerald-500/10 border border-emerald-500/20 text-emerald-400"
                       : "bg-emerald-50 border border-emerald-200 text-emerald-700"
-                  }`}
+                    }`}
                 >
                   <Check className="w-5 h-5" />
 
@@ -782,11 +803,10 @@ const SettingCMP = () => {
                             !showOldPassword
                           )
                         }
-                        className={`absolute inset-y-0 right-0 pr-3 flex items-center ${
-                          isDark
+                        className={`absolute inset-y-0 right-0 pr-3 flex items-center ${isDark
                             ? "text-slate-500 hover:text-slate-300"
                             : "text-slate-400 hover:text-slate-600"
-                        }`}
+                          }`}
                       >
                         {showOldPassword ? (
                           <EyeOff className="w-4 h-4" />
@@ -827,11 +847,10 @@ const SettingCMP = () => {
                             !showNewPassword
                           )
                         }
-                        className={`absolute inset-y-0 right-0 pr-3 flex items-center ${
-                          isDark
+                        className={`absolute inset-y-0 right-0 pr-3 flex items-center ${isDark
                             ? "text-slate-500 hover:text-slate-300"
                             : "text-slate-400 hover:text-slate-600"
-                        }`}
+                          }`}
                       >
                         {showNewPassword ? (
                           <EyeOff className="w-4 h-4" />

@@ -25,7 +25,10 @@ const TodoContent = () => {
     const [editTitle, setEditTitle] = useState("")
     const [editDescription, setEditDescription] = useState("")
     const [selectedTodo, setSelectedTodo] = useState(null)
+
     const [search, setSearch] = useState("")
+    const [filter, setFilter] = useState("all")
+
     const [showDeleteBar, setShowDeleteBar] = useState(false)
     const [deleteTodo, setDeleteTodo] = useState(null)
 
@@ -94,15 +97,20 @@ const TodoContent = () => {
         }
     }
 
-    const filteredTodos = todos.filter(
-        (todo) =>
-            todo.title
-                .toLowerCase()
-                .includes(search.toLowerCase()) ||
-            todo.description
-                ?.toLowerCase()
-                .includes(search.toLowerCase())
-    )
+    const filteredTodos = todos.filter((todo) => {
+        const searchValue = search.toLowerCase().trim()
+
+        const matchesSearch =
+            todo.title?.toLowerCase().includes(searchValue) ||
+            todo.description?.toLowerCase().includes(searchValue)
+
+        const matchesFilter =
+            filter === "all" ||
+            (filter === "pending" && !todo.isCompleted) ||
+            (filter === "completed" && todo.isCompleted)
+
+        return matchesSearch && matchesFilter
+    })
 
     const handleCloseEdit = () => {
         setSelectedTodo(null)
@@ -119,7 +127,7 @@ const TodoContent = () => {
     }
 
     const handleUpdateTodo = async () => {
-        if (!editTitle.trim()) return
+        if (!editTitle.trim() || !selectedTodo) return
 
         try {
             dispatch(setLoading(true))
@@ -175,19 +183,45 @@ const TodoContent = () => {
                         placeholder="Search your todos..."
                         className={`w-full h-12 px-4 rounded-lg border outline-none shadow-sm focus:ring-2 transition ${inputClass}`}
                     />
+
+                    <div className="grid grid-cols-3 gap-2 mt-4">
+                        {[
+                            {
+                                value: "all",
+                                label: "All"
+                            },
+                            {
+                                value: "pending",
+                                label: "Pending"
+                            },
+                            {
+                                value: "completed",
+                                label: "Completed"
+                            }
+                        ].map((item) => (
+                            <button
+                                key={item.value}
+                                type="button"
+                                onClick={() => setFilter(item.value)}
+                                className={`h-10 rounded-lg text-sm font-medium transition ${
+                                    filter === item.value
+                                        ? "bg-indigo-600 text-white shadow-sm"
+                                        : isDark
+                                            ? "bg-[#20252b] text-slate-400 hover:bg-slate-800 hover:text-slate-200 border border-slate-700"
+                                            : "bg-white text-slate-500 hover:bg-slate-50 hover:text-slate-900 border border-slate-200"
+                                }`}
+                            >
+                                {item.label}
+                            </button>
+                        ))}
+                    </div>
                 </div>
 
                 <TodoCard
                     filteredTodosArray={filteredTodos}
-                    onEdit={(todo) => {
-                        handleEdit(todo)
-                    }}
-                    onDelete={(id) => {
-                        handleDeleteClick(id)
-                    }}
-                    onToggle={(id) => {
-                        handleToggle(id)
-                    }}
+                    onEdit={handleEdit}
+                    onDelete={handleDeleteClick}
+                    onToggle={handleToggle}
                 />
 
                 {showEditTodo && (
@@ -210,7 +244,10 @@ const TodoContent = () => {
                                                 : "bg-indigo-50 text-indigo-600"
                                         }`}
                                     >
-                                        <ListPlus size={21} strokeWidth={2} />
+                                        <ListPlus
+                                            size={21}
+                                            strokeWidth={2}
+                                        />
                                     </div>
 
                                     <div>
@@ -278,7 +315,9 @@ const TodoContent = () => {
                                     className={`w-full px-4 py-3 rounded-lg border outline-none resize-none shadow-sm focus:ring-2 transition ${inputClass}`}
                                 />
 
-                                <p className={`mt-1.5 text-xs ${mutedClass}`}>
+                                <p
+                                    className={`mt-1.5 text-xs ${mutedClass}`}
+                                >
                                     Add enough detail so you know exactly what
                                     needs to be done.
                                 </p>
@@ -391,4 +430,3 @@ const TodoContent = () => {
 }
 
 export default TodoContent
-
