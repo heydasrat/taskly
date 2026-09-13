@@ -93,7 +93,7 @@ const LoginCMP = () => {
 
             {error && <ErrorMessage message={error} />}
 
-            <div className="grid grid-cols-2 gap-2 mb-5 mt-2">
+            {/* <div className="grid grid-cols-2 gap-2 mb-5 mt-2">
               <button
                 
                 type="button"
@@ -116,14 +116,14 @@ const LoginCMP = () => {
                 </svg>
                 GitHub
               </button>
-            </div>
+            </div> */}
 
-            <div className="relative flex items-center justify-center mb-5">
+            {/* <div className="relative flex items-center justify-center mb-5">
               <div className="w-full h-px bg-slate-200" />
               <span className="absolute px-3 bg-white text-xs uppercase tracking-wide text-slate-400">
                 Or continue with
               </span>
-            </div>
+            </div> */}
 
             <form onSubmit={handleSubmit} noValidate className="space-y-4">
               <div>

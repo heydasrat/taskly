@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { changePassword, updateProfile,deleteAvatar } from "../controllers/userManagement.controller.js";
+import { changePassword, updateProfile, deleteAvatar, toggleTheme } from "../controllers/userManagement.controller.js";
 import verifyJWT from "../middlewares/auth.middleware.js";
 import upload from "../middlewares/multer.middleware.js";
 
@@ -16,5 +16,6 @@ router.route("/update-profile").patch(verifyJWT, upload.fields([
         maxCount: 1
     }
 ]), updateProfile)
-router.route("/delete-avatar").patch(verifyJWT,deleteAvatar)
+router.route("/delete-avatar").patch(verifyJWT, deleteAvatar)
+router.route("/toggle-theme").patch(verifyJWT, toggleTheme)
 export default router

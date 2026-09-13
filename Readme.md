@@ -1,298 +1,427 @@
 # Taskly
 
-A clean, responsive full-stack Todo application with a React frontend and a Node/Express/MongoDB backend. It supports user authentication, profile management (with avatar/cover image uploads), and Todo creation, built with a layered, maintainable architecture on both ends.
+Taskly is a full-stack todo application built with React on the frontend and Node.js/Express with MongoDB on the backend. The current implementation includes user registration, email verification, login/logout, password reset flows, profile management, and a per-user todo dashboard.
 
-## Table of Contents
+This README reflects the features that are actually implemented in the codebase as of the current project state.
 
-- [Tech Stack](#tech-stack)
-- [Project Structure](#project-structure)
-- [Architecture](#architecture)
-- [Authentication Flow](#authentication-flow)
-- [API Reference](#api-reference)
-- [Frontend State Management](#frontend-state-management)
-- [Todo Flow](#todo-flow)
-- [Account Settings](#account-settings)
-- [File Uploads](#file-uploads)
-- [Environment Variables](#environment-variables)
-- [Getting Started](#getting-started)
-- [Available Scripts](#available-scripts)
-- [API Response Convention](#api-response-convention)
-- [Production Considerations](#production-considerations)
-- [Contributing](#contributing)
-- [License](#license)
+## 1. Project overview
 
----
+Taskly is a personal task management app with authenticated user accounts. Users can create an account, verify their email, sign in, manage their profile, and create, view, search, edit, complete, and delete todos.
 
-## Tech Stack
+The app has a layered architecture:
 
-### Frontend
+- Frontend: React + Vite + Redux Toolkit + React Router
+- Backend: Express + MongoDB + Mongoose
+- Authentication: JWT stored in HTTP-only cookies
+- File uploads: Cloudinary integration for avatar uploads
+- Email delivery: Gmail OAuth2 SMTP via Nodemailer
 
-| Technology | Purpose |
-|---|---|
-| React 19 | UI development |
-| Vite | Dev server & production build |
-| Redux Toolkit | Global state management |
-| React Redux | Connecting components to Redux |
-| React Router | Client-side routing |
-| Axios | Backend API communication |
-| Tailwind CSS | Styling & responsive UI |
-| Lucide React | UI icons |
-| ESLint | Code quality |
+## 2. Features
 
-### Backend
+### Implemented user features
 
-- Node.js
-- Express.js
-- MongoDB / Mongoose
-- JWT authentication
-- Multer (multipart file uploads)
-- JavaScript ES Modules
+- User registration with full name, email, username, and password
+- Email verification via 6-digit OTP sent to the registered email
+- Login using either username or email
+- Logout using a JWT-based server-side session
+- Fetch current authenticated user from backend
+- Password reset flow using email OTP verification and reset token
+- Change password for authenticated users
+- Profile update for username and full name
+- Avatar upload for authenticated users
+- Remove profile avatar
+- Todo creation, listing, search, update, completion toggle, and deletion
+- Protected routes for authenticated users
+- Redux-managed auth and todo state on the frontend
 
----
+### Frontend-only UI behaviors
 
-## Project Structure
+- Login page with password visibility toggle
+- Registration page
+- Email verification page with 6-digit code entry and resend option
+- Forgot password page
+- OTP verification page
+- Reset password page
+- Settings page for profile and password updates
+- Home page with todo summary and add-todo modal
+- Todo list with inline search
+- Todo edit modal and delete confirmation modal
+- Navbar with user avatar, email, username, and logout action
 
-```
-full-stack-todo/
-│
+## 3. Frontend features
+
+The frontend is in the `frontend/` folder and is built with Vite.
+
+Key frontend capabilities:
+
+- Client-side routing with React Router
+- Protected and auth-only route guards
+- Redux slices for auth and todo state
+- Shared Axios instance configured with `withCredentials: true`
+- Request flow that calls backend API under `/v1/api`
+- Todo UI implementing create, search, edit, delete, and toggle completion
+- Settings UI for profile and password updates
+- File input for JPEG profile image upload
+
+Notable frontend implementation details:
+
+- `App.jsx` loads the current user on startup using `GET /auth/me`
+- `ProtectedRoutes.jsx` blocks unauthenticated users from protected pages
+- `AuthRoutes.jsx` redirects authenticated users away from login/register pages
+- `authSlice.js` stores `isLoading`, `isAuthenticated`, and `user`
+- `todoSlice.js` stores a list of todos and loading state
+
+## 4. Backend features
+
+The backend is in the `backend/` folder and uses ES modules.
+
+Implemented backend features:
+
+- Express server configured with CORS, JSON parsing, URL encoding, cookie parsing, and rate limiting
+- MongoDB connection via Mongoose
+- User model with username, full name, email, password, refresh token, avatar, and verification status
+- Todo model linked to a user
+- OTP model for email verification and reset flows
+- Password reset model entry, although the actual reset flow uses JWT tokens and OTP verification instead of storing reset records in a persistent table
+- Error handling with custom `ApiError` and `ApiResponse`
+- JWT generation for access and refresh tokens
+- Protected middleware for route authorization
+- Cloudinary upload helper for avatar storage
+- Email sending via Gmail OAuth2
+
+## 5. Authentication and authorization
+
+Authentication is implemented with JWT and cookies.
+
+How it works:
+
+- On login, the backend generates an access token and refresh token
+- Both tokens are set as HTTP-only cookies
+- `verifyJWT` reads the access token from `req.cookies.accessToken` or the Authorization header
+- The token payload is decoded and the user is loaded from MongoDB before the request continues
+- Routes under `/v1/api/auth` and `/v1/api/user` and `/v1/api/todo` are protected as needed
+
+Important implementation facts:
+
+- Authentication is cookie-based and uses `withCredentials: true` in the frontend
+- Access tokens are not refreshed through a dedicated refresh endpoint in the code
+- The app uses a single authenticated user flow; there is no refresh-token endpoint or token rotation flow implemented in the API
+- `verifyJWT` runs on protected endpoints, but there is no role-based authorization system in place
+
+## 6. User roles
+
+There is no implemented role system in the app.
+
+Evidence from the code:
+
+- The `User` model contains a commented-out `role` field rather than an active role schema
+- No role checks are performed in controllers or middleware
+- No admin/user distinction is enforced in routes or UI
+
+The effective model is: all authenticated users are treated as standard users.
+
+## 7. Database
+
+The backend uses MongoDB with Mongoose.
+
+Database configuration:
+
+- Connection string from `backend/.env` via `MONGODB_URI`
+- Database name is defined in `backend/src/constant.js` as `inkora`
+- MongoDB connection is created in `backend/src/db/index.js`
+
+Collections / models used:
+
+- `User`
+- `Todo`
+- `OTP`
+- `PasswordReset` (defined, but not heavily used as the actual reset flow is token-based)
+
+Document relationships:
+
+- Each `Todo` has a `user` field referencing a `User` document
+- `OTP` entries are keyed by email and expire automatically due to the `expiresAt` index
+
+## 8. API endpoints
+
+All endpoints are mounted under the API prefix `/v1/api`.
+
+### Authentication endpoints
+
+| Method | Endpoint | Auth required | Description |
+| --- | --- | --- | --- |
+| POST | `/v1/api/auth/register` | No | Register a new user and send OTP email |
+| POST | `/v1/api/auth/verify-email` | No | Verify newly registered email with OTP |
+| POST | `/v1/api/auth/login` | No | Login using username or email |
+| POST | `/v1/api/auth/logout` | Yes | Clear cookies and log user out |
+| GET | `/v1/api/auth/me` | Yes | Return current authenticated user |
+| POST | `/v1/api/auth/request-password-reset` | No | Send password reset OTP |
+| POST | `/v1/api/auth/verify-otp` | No | Verify reset code and return a reset token |
+| PATCH | `/v1/api/auth/reset-password` | No | Set a new password with a valid reset token |
+| POST | `/v1/api/auth/resend-otp` | No | Resend email verification OTP |
+
+### User management endpoints
+
+| Method | Endpoint | Auth required | Description |
+| --- | --- | --- | --- |
+| PATCH | `/v1/api/user/change-password` | Yes | Change the current user's password |
+| PATCH | `/v1/api/user/update-profile` | Yes | Update username/full name and optionally upload avatar |
+| PATCH | `/v1/api/user/delete-avatar` | Yes | Remove the current user's avatar |
+
+### Todo endpoints
+
+| Method | Endpoint | Auth required | Description |
+| --- | --- | --- | --- |
+| GET | `/v1/api/todo/todos` | Yes | Get all todos for the logged-in user |
+| POST | `/v1/api/todo/todos` | Yes | Create a todo |
+| GET | `/v1/api/todo/todos/:todoId` | Yes | Get one todo by ID |
+| PATCH | `/v1/api/todo/todos/:todoId` | Yes | Update a todo |
+| PATCH | `/v1/api/todo/todos/:todoId/toggle` | Yes | Toggle completion status |
+| DELETE | `/v1/api/todo/todos/:todoId` | Yes | Delete a todo |
+
+### Request and response conventions
+
+The backend uses a wrapper pattern:
+
+- `ApiResponse` adds `success`, `statusCode`, `data`, and `message`
+- `ApiError` is thrown for validation and authorization errors
+- Error middleware sends a JSON response with `success`, `message`, and `errors`
+
+## 9. Project structure
+
+```text
+Full Stack Todo/
 ├── backend/
-│   ├── controllers/
-│   │   ├── user.controller.js
-│   │   └── userManagement.controller.js
-│   ├── middlewares/
-│   │   ├── auth.middleware.js
-│   │   └── multer.middleware.js
-│   ├── models/
-│   │   └── user.model.js
-│   ├── routes/
-│   │   ├── user.routes.js
-│   │   ├── userManagement.routes.js
-│   │   └── todo.routes.js
-│   ├── utils/
-│   ├── app.js
-│   ├── index.js
+│   ├── .env
 │   ├── package.json
-│   └── .env
-│
-└── frontend/
-    ├── public/
-    ├── src/
-    │   ├── app/
-    │   │   ├── features/
-    │   │   │   ├── authSlice.js
-    │   │   │   └── todoSlice.js
-    │   │   └── store/
-    │   │       └── store.js
-    │   ├── assets/
-    │   ├── components/
-    │   │   ├── Axios/
-    │   │   ├── Error/
-    │   │   ├── Home/
-    │   │   ├── Login/
-    │   │   ├── NavBar/
-    │   │   ├── Register/
-    │   │   ├── Setting/
-    │   │   ├── Todo/
-    │   │   ├── TodoCard/
-    │   │   ├── TodoContent/
-    │   │   └── TodoHeader/
-    │   ├── Pages/
-    │   │   ├── Home/
-    │   │   ├── Login/
-    │   │   ├── Register/
-    │   │   ├── Setting/
-    │   │   └── index.js
-    │   ├── routes/
-    │   │   ├── AuthRoutes/
-    │   │   ├── ProtectedRoutes/
-    │   │   ├── PublicRoutes/
-    │   │   └── index.js
-    │   └── App.jsx
-    ├── package.json
-    └── vite.config.js
+│   ├── public/
+│   └── src/
+│       ├── app.js
+│       ├── index.js
+│       ├── constant.js
+│       ├── config/
+│       │   └── config.js
+│       ├── controllers/
+│       │   ├── todo.controller.js
+│       │   ├── user.controller.js
+│       │   └── userManagement.controller.js
+│       ├── db/
+│       │   └── index.js
+│       ├── middlewares/
+│       │   ├── auth.middleware.js
+│       │   └── multer.middleware.js
+│       ├── models/
+│       │   ├── PasswordReset.model.js
+│       │   ├── otp.model.js
+│       │   ├── todo.model.js
+│       │   └── user.model.js
+│       ├── routes/
+│       │   ├── todo.route.js
+│       │   ├── user.route.js
+│       │   └── userManagement.route.js
+│       ├── service/
+│       │   └── email.service.js
+│       └── utils/
+│           ├── ApiError.js
+│           ├── ApiResponse.js
+│           ├── asyncHandler.js
+│           ├── otp.utils.js
+│           └── uploadOnCloudinary.js
+├── frontend/
+│   ├── .env
+│   ├── package.json
+│   ├── index.html
+│   ├── vite.config.js
+│   ├── public/
+│   └── src/
+│       ├── App.jsx
+│       ├── main.jsx
+│       ├── index.css
+│       ├── app/
+│       │   ├── features/
+│       │   │   ├── authSlice.js
+│       │   │   └── todoSlice.js
+│       │   └── store/
+│       │       └── store.js
+│       ├── components/
+│       │   ├── Axios/Axios.js
+│       │   ├── Error/Error.jsx
+│       │   ├── ForgotPasswordCMP/ForgotPasswordCMP.jsx
+│       │   ├── Home/Home.jsx
+│       │   ├── Login/Login.jsx
+│       │   ├── NavBar/Navbar.jsx
+│       │   ├── Register/Register.jsx
+│       │   ├── ResetPasswordCMP/ResetPasswordCMP.jsx
+│       │   ├── Setting/SettingCMP.jsx
+│       │   ├── Todo/Todo.jsx
+│       │   ├── TodoCard/TodoCard.jsx
+│       │   ├── TodoContent/TodoContent.jsx
+│       │   ├── TodoHeader/TodoHeader.jsx
+│       │   ├── VerifyEmail/VerifyEmailCMP.jsx
+│       │   ├── VerifyOTPCMP/VerifyOTPCMP.jsx
+│       │   └── index.js
+│       ├── Pages/
+│       │   ├── ForgotPassword/ForgotPassword.jsx
+│       │   ├── Home/Home.jsx
+│       │   ├── Login/Login.jsx
+│       │   ├── Register/Register.jsx
+│       │   ├── ResetPassword/ResetPassword.jsx
+│       │   ├── Setting/Setting.jsx
+│       │   ├── VerifyEmail/VerifyEmail.jsx
+│       │   ├── VerifyOTP/VerifyOTP.jsx
+│       │   └── index.js
+│       └── routes/
+│           ├── AuthRoutes/AuthRoutes.jsx
+│           ├── ProtectedRoutes/ProtectedRoutes.jsx
+│           ├── PublicRoutes/PublicRoutes.jsx
+│           └── index.js
+├── Readme.md
+└── package.json
 ```
 
-> Your exact backend folders may differ slightly — the important separation is between routes, controllers, middleware, and models.
+## 10. Setup and installation
 
----
+### Prerequisites
 
-## Architecture
+- Node.js and npm
+- MongoDB Atlas connection or local MongoDB instance
+- Cloudinary account for avatar uploads
+- Gmail account with OAuth2 app credentials for email sending
 
-**Backend** follows a layered request flow:
+### Installation
 
-```
-Routes → Middleware → Controllers → Models / Database → Response
-```
+1. Install backend dependencies:
 
-- **Routes** – define HTTP methods, endpoints, and which middleware/controller handles them. Kept lightweight.
-- **Middleware** – handles cross-cutting concerns like authentication (`verifyJWT`) and file uploads (`upload`).
-- **Controllers** – contain the actual application logic (`user.controller.js`, `userManagement.controller.js`).
-- **Models** – define MongoDB data structure via Mongoose.
-
-**Frontend** keeps responsibilities separated:
-
-- `components/` – reusable UI and feature components
-- `Pages/` – application-level pages
-- `routes/` – access control (Auth / Protected / Public routes)
-- `app/features/` – Redux slices
-- `app/store/` – Redux store configuration
-- `Axios/` – shared API client
-
-### Overall Flow
-
-```
-┌──────────────────────┐
-│      React App       │
-│  Components / Pages  │
-└──────────┬───────────┘
-           │ Axios (withCredentials)
-           ▼
-┌──────────────────────┐
-│    Express API       │
-│ Routes + Middleware  │
-└──────────┬───────────┘
-           │
-           ▼
-┌──────────────────────┐
-│ MongoDB / Mongoose   │
-└──────────────────────┘
+```bash
+cd backend
+npm install
 ```
 
----
+2. Install frontend dependencies:
 
-## Authentication Flow
-
-```
-Register → Login → Backend authenticates user → User stored in Redux
-    → Protected routes become available → User accesses Todo app
+```bash
+cd frontend
+npm install
 ```
 
-- Login sends `{ identifier, password }` to `POST /auth/login`.
-- On success, the returned user is dispatched into the Redux auth slice.
-- Protected routes use the `verifyJWT` middleware on the backend:
+3. Create the required environment variables in `backend/.env` and `frontend/.env`.
 
-```js
-router
-    .route("/logout")
-    .post(verifyJWT, logout)
+## 11. Environment variables
+
+### Backend (`backend/.env`)
+
+The backend expects these variables:
+
+```env
+PORT=8000
+MONGODB_URI=mongodb+srv://...
+CORS_ORIGIN=http://localhost:5173
+ACCESS_TOKEN_SECRET=...
+ACCESS_TOKEN_EXPIRY=5d
+REFRESH_TOKEN_SECRET=...
+REFRESH_TOKEN_EXPIRY=30d
+CLOUDINARY_CLOUD_NAME=...
+CLOUDINARY_API_KEY=...
+CLOUDINARY_API_SECRET=...
+GOOGLE_CLIENT_ID=...
+GOOGLE_CLIENT_SECRET=...
+GOOGLE_REFRESH_TOKEN=...
+EMAIL_USER=...
+RESET_PASSWORD_TOKEN=...
+RESET_PASSWORD_TOKEN_EXPIRY=10m
 ```
 
-```
-Client Request → Express Router → verifyJWT → Controller → Response
-```
+These are validated in `backend/src/config/config.js` at startup.
 
-- The app supports redirecting a user back to the protected page they originally tried to access.
-- The frontend sends requests with `withCredentials: true` so auth cookies are included.
+### Frontend (`frontend/.env`)
 
----
-
-## API Reference
-
-| Method | Endpoint | Auth | Purpose |
-|---|---|---|---|
-| POST | `/auth/register` | No | Register a user |
-| POST | `/auth/login` | No | Login |
-| POST | `/auth/logout` | Yes | Logout |
-| GET | `/auth/me` | Yes | Get current user |
-| PATCH | `/user/change-password` | Yes | Change password |
-| PATCH | `/user/update-profile` | Yes | Update profile |
-| POST | `/todo/todos` | Yes | Create Todo |
-
-> The Todo endpoint is documented from the frontend integration; its full backend route/controller implementation wasn't included in the provided backend source.
-
-### Register — `POST /auth/register`
-
-Creates a new user account. Accepts optional multipart fields:
-
-```js
-upload.fields([
-    { name: "avatar", maxCount: 1 },
-    { name: "coverImage", maxCount: 1 }
-])
+```env
+VITE_API_URL=http://localhost:8000/v1/api
 ```
 
-### Login — `POST /auth/login`
+## 12. How to run frontend
+
+From the frontend folder:
+
+```bash
+cd frontend
+npm run dev
+```
+
+The frontend dev server starts with Vite and typically runs on:
+
+- http://localhost:5173
+
+## 13. How to run backend
+
+From the backend folder:
+
+```bash
+cd backend
+npm run dev
+```
+
+This runs the Express server via `nodemon src/index.js`.
+
+The backend listens on the value from `PORT` in `backend/.env`, which is currently set to 8000.
+
+## 14. Available npm scripts
+
+### Backend scripts
+
+From `backend/package.json`:
 
 ```json
-{
-    "identifier": "username-or-email",
-    "password": "your-password"
+"scripts": {
+  "dev": "nodemon src/index.js"
 }
 ```
 
-Returns the authenticated user and establishes the auth state used by protected endpoints.
+### Frontend scripts
 
-### Logout — `POST /auth/logout`
-Requires `verifyJWT`.
-
-### Current User — `GET /auth/me`
-Requires `verifyJWT`. Returns the currently authenticated user.
-
-### Change Password — `PATCH /user/change-password`
+From `frontend/package.json`:
 
 ```json
-{
-    "oldPassword": "current-password",
-    "newPassword": "new-password"
+"scripts": {
+  "dev": "vite",
+  "build": "vite build",
+  "lint": "eslint .",
+  "preview": "vite preview"
 }
 ```
 
-Requires `verifyJWT`. Frontend validates the new password is at least 8 characters before submitting.
+## 15. Important technical details
 
-### Update Profile — `PATCH /user/update-profile`
+- The project uses ES modules (`"type": "module"`) in both frontend and backend
+- The backend uses Express 5
+- The frontend uses React 19 and Vite 8
+- JWT access tokens are stored in cookies with `httpOnly` and `secure` flags
+- Middleware enforces request rate limiting:
+  - global rate limit: about 100 requests per 15 minutes
+  - auth limiter: about 10 requests per 15 minutes
+- Avatar uploads are processed with Multer and Cloudinary
+- Email verification and password reset use 6-digit OTPs
+- All protected routes are user-scoped; a todo only belongs to the authenticated user
+- The frontend app relies on Redux for auth and todo state, not a query library like React Query
 
-Requires `verifyJWT`. Accepts multipart form data:
+## 16. Known limitations and caveats
 
-- `username`
-- `fullName`
-- `avatar` (max 1)
-- `coverImage` (max 1)
+These limitations are visible from the code and are not assumptions:
 
-```js
-router
-    .route("/update-profile")
-    .patch(
-        verifyJWT,
-        upload.fields([
-            { name: "avatar", maxCount: 1 },
-            { name: "coverImage", maxCount: 1 }
-        ]),
-        updateProfile
-    )
-```
+- There is no implemented admin/user role system; role-based authorization is not active
+- There is no dedicated refresh-token endpoint or refresh flow implemented
+- There is no logout or session invalidation beyond clearing cookies on the client and clearing the refresh token in the database
+- `deleteAvatar` on the backend does not remove the old avatar from Cloudinary if `public_id` is missing or if the `user.avatar` object is null; it is a simple nulling flow
+- The todo API returns `404` when no todos are found, which is not a common REST pattern for empty collections
+- The frontend includes the `@react-oauth/google` dependency, but the actual Google login flow is not implemented in the current UI or backend routes
+- There is no root-level monorepo script or workspace script; the project is split into separate backend and frontend apps
+- There are no automated tests implemented in the repository
+- The `PasswordReset` model exists, but the actual reset flow is primarily driven by JWT token verification and OTP checks, not a database-backed reset record lifecycle
+- The app accepts only JPEG avatar uploads (`.jpg` / `.jpeg`) in the frontend and backend validation
 
-### Create Todo — `POST /todo/todos`
+## Summary
 
-Requires auth. Body contains `title` and `description`. On success, the returned Todo is added to the Redux store.
-
----
-
-## Frontend State Management
-
-Redux Toolkit manages global state via two slices:
-
-```
-Redux Store
-│
-├── auth
-│   ├── isLoading
-│   ├── isAuthenticated
-│   └── user
-│
-└── todo
-    ├── todos
-    └── isLoading
-```
-
-**Auth slice actions:** `login()`, `logout()`, `setLoading()`
-
-**Todo slice actions:** `addTodo()`, `setTodos()`, `setLoading()`, `removeTodo()`, `updateTodo()`, `toggleTodo()`
-
-Todos are matched by their `_id`, matching the MongoDB/Mongoose backend structure.
-
-### API Layer
-
-A single shared Axios instance is used instead of per-component configs:
+This project is a working personal todo application with account management, email verification, password recovery, and authenticated todo storage. It does not currently include role-based access control, Google sign-in, or a full refresh-token architecture, and the README above documents only the features that are actually present in the current code.
 
 ```js
 const api = axios.create({

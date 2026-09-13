@@ -55,12 +55,13 @@ const userSchema = new mongoose.Schema(
                 default: ""
             }
         },
-        // role:{
-        //     type:String,
-        //     enum:["user","admin"],
-        //     default:"user",
-        // },
-
+        preferences: {
+            theme: {
+                type: String,
+                default: "light",
+                enum: ["light", "dark"]
+            }
+        },
 
         refreshToken: {
             type: String,

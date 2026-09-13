@@ -3,6 +3,7 @@ import config from './config/config.js'
 import cookieParser from 'cookie-parser'
 import cors from 'cors'
 import { rateLimit } from 'express-rate-limit'
+import helmet from 'helmet'
 
 const app = express()
 
@@ -10,6 +11,8 @@ app.use(cors({
   origin: config.corsOrigin,
   credentials: true
 }))
+
+app.use(helmet())
 
 
 const rateLimitHandler = asyncHandler(async (req, res) => {
@@ -40,6 +43,7 @@ const authLimiter = rateLimit({
 })
 
 app.use('/v1/api/auth', authLimiter)
+app.use('/v1/api/user', authLimiter)
 // app.use('/v1/api/todo', authLimiter)
 
 

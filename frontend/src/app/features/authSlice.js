@@ -26,11 +26,11 @@ const authSlice = createSlice({
         },
         updateAvatar: (state, action) => {
             state.user.avatar.url = action.payload
-        }
+        },
 
     },
 });
 
-export const { login, logout, setLoading,updateAvatar } = authSlice.actions;
+export const { login, logout, setLoading, updateAvatar } = authSlice.actions;
 
 export default authSlice.reducer;

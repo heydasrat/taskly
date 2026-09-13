@@ -12,7 +12,8 @@ import PasswordReset from '../models/PasswordReset.model.js'
 
 const options = {
     secure: true,
-    httpOnly: true
+    httpOnly: true,
+    sameSite: "strict"
 }
 
 
@@ -462,7 +463,7 @@ const refreshAccessToken = asyncHandler(async (req, res) => {
 
         const { refreshToken, accessToken } = await generateAccessAndRefreshToken(user._id)
 
-        
+
 
         return res.status(200)
             .cookie("accessToken", accessToken, options)

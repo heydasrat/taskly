@@ -124,13 +124,13 @@ const changePassword = asyncHandler(async (req, res) => {
 
 
 const deleteAvatar = asyncHandler(async (req, res) => {
-    const user = await User.findById({_id:req.user._id,isVerified:true});
+    const user = await User.findById({ _id: req.user._id, isVerified: true });
 
     if (!user) {
         throw new ApiError(404, "User not found!")
     }
 
-   
+
 
     if (user.avatar.public_id) {
         user.avatar.url = null,
@@ -147,8 +147,32 @@ const deleteAvatar = asyncHandler(async (req, res) => {
     )
 })
 
+const toggleTheme = asyncHandler(async (req, res) => {
+    const { theme } = req.body
+
+    if (!theme || theme.trim() === "") {
+        throw new ApiError(400, "Invalid theme!")
+    }
+    const user = await User.findByIdAndUpdate(
+        req.user._id,
+        {
+            $set: {
+                "preferences.theme": theme
+            }
+        },
+        {
+            new: true
+        }
+    )
+
+    return res.status(200).json(
+        new ApiResponse(200, user, "Theme changed successfully")
+    )
+})
+
 export {
     changePassword,
     updateProfile,
-    deleteAvatar
+    deleteAvatar,
+    toggleTheme
 }
