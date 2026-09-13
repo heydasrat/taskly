@@ -444,6 +444,39 @@ const resendOTP = asyncHandler(async (req, res) => {
 
 })
 
+const refreshAccessToken = asyncHandler(async (req, res) => {
+    const token = req.cookies?.refreshToken ||
+        req.header("Authorization")?.replace("Bearer ", "")
+    if (!token) {
+        throw new ApiError(401, "Unauthorized request")
+    }
+
+    try {
+        const decodedToken = jwt.verify(token, config.refreshTokenSecret)
+
+        const user = await User.findById(decodedToken?._id).select("-password -refreshToken")
+
+        if (!user) {
+            throw new ApiError(401, "Invalid Refresh Token")
+        }
+
+        const { refreshToken, accessToken } = await generateAccessAndRefreshToken(user._id)
+
+        
+
+        return res.status(200)
+            .cookie("accessToken", accessToken, options)
+            .cookie("refreshToken", refreshToken, options)
+            .json(
+                new ApiResponse(200, { accessToken, refreshToken }, "Access and refresh token refreshed successfully!")
+            )
+
+    } catch (error) {
+        throw new ApiError(401, error?.message || "Invalid access token")
+
+    }
+})
+
 export {
     register,
     verifyEmail,
@@ -453,5 +486,6 @@ export {
     requestPasswordReset,
     verifyPasswordResetOtp,
     resetPassword,
-    resendOTP
+    resendOTP,
+    refreshAccessToken
 } 
