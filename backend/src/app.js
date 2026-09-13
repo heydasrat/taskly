@@ -19,7 +19,7 @@ const rateLimitHandler = asyncHandler(async (req, res) => {
   throw new ApiError(429, "Too many requests. Please try again later.")
 })
 
-// Global rate limiter
+
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   limit: 100,
@@ -31,7 +31,7 @@ const limiter = rateLimit({
 
 app.use(limiter)
 
-// Stricter auth rate limiter
+
 const authLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   limit: 10,
@@ -67,12 +67,12 @@ import asyncHandler from './utils/asyncHandler.js'
 import ApiResponse from './utils/ApiResponse.js'
 import ApiError from './utils/ApiError.js'
 
-// Routes
+// Routes Declaration
 app.use('/v1/api/auth', userRoutes)
 app.use('/v1/api/user', userManagementRoutes)
 app.use('/v1/api/todo', todoRoutes)
 
-// 404
+
 app.use((req, res) => {
   res.status(404).json({
     success: false,
@@ -80,7 +80,7 @@ app.use((req, res) => {
   })
 })
 
-// Error handler
+
 app.use((err, req, res, next) => {
   res.status(err.statusCode || 500).json({
     success: err.success || false,
