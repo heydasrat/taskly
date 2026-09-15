@@ -11,9 +11,16 @@ import {
 
 import { useState } from "react"
 
-import { X, ListPlus, Trash2 } from "lucide-react"
+import {
+    X,
+    ListPlus,
+    Trash2,
+    ChevronDown,
+    Check
+} from "lucide-react"
 
 import TodoCard from "../TodoCard/TodoCard"
+
 
 const TodoContent = () => {
     const { todos } = useSelector((state) => state.todo)
@@ -28,6 +35,9 @@ const TodoContent = () => {
 
     const [search, setSearch] = useState("")
     const [filter, setFilter] = useState("all")
+
+    const [sort, setSort] = useState("newest")
+    const [showSortMenu, setShowSortMenu] = useState(false)
 
     const [showDeleteBar, setShowDeleteBar] = useState(false)
     const [deleteTodo, setDeleteTodo] = useState(null)
@@ -59,6 +69,13 @@ const TodoContent = () => {
         ? "text-slate-400"
         : "text-slate-500"
 
+    const sortLabels = {
+        newest: "Newest",
+        oldest: "Oldest",
+        completed: "Completed first"
+    }
+
+
     const handleDelete = async (id) => {
         try {
             dispatch(setLoading(true))
@@ -74,6 +91,7 @@ const TodoContent = () => {
             dispatch(setLoading(false))
         }
     }
+
 
     const handleToggle = async (id) => {
         try {
@@ -97,6 +115,7 @@ const TodoContent = () => {
         }
     }
 
+
     const filteredTodos = todos.filter((todo) => {
         const searchValue = search.toLowerCase().trim()
 
@@ -112,6 +131,24 @@ const TodoContent = () => {
         return matchesSearch && matchesFilter
     })
 
+
+    const sortedTodos = [...filteredTodos].sort((a, b) => {
+        if (sort === "newest") {
+            return new Date(b.createdAt) - new Date(a.createdAt)
+        }
+
+        if (sort === "oldest") {
+            return new Date(a.createdAt) - new Date(b.createdAt)
+        }
+
+        if (sort === "completed") {
+            return Number(b.isCompleted) - Number(a.isCompleted)
+        }
+
+        return 0
+    })
+
+
     const handleCloseEdit = () => {
         setSelectedTodo(null)
         setEditTitle("")
@@ -119,12 +156,14 @@ const TodoContent = () => {
         setShowEditTodo(false)
     }
 
+
     const handleEdit = (todo) => {
         setSelectedTodo(todo)
         setEditTitle(todo.title)
         setEditDescription(todo.description || "")
         setShowEditTodo(true)
     }
+
 
     const handleUpdateTodo = async () => {
         if (!editTitle.trim() || !selectedTodo) return
@@ -151,15 +190,23 @@ const TodoContent = () => {
         }
     }
 
+    const handleSortChange = (value) => {
+        setSort(value)
+        setShowSortMenu(false)
+    }
+
+
     const handleDeleteClick = (id) => {
         setDeleteTodo(id)
         setShowDeleteBar(true)
     }
 
+
     const handleCloseDelete = () => {
         setDeleteTodo(null)
         setShowDeleteBar(false)
     }
+
 
     const handleConfirmDelete = async () => {
         if (!deleteTodo) return
@@ -170,12 +217,16 @@ const TodoContent = () => {
         setShowDeleteBar(false)
     }
 
+
     return (
         <div className="w-full flex justify-center px-4 pb-10">
+
             <div
                 className={`w-full max-w-[800px] rounded-2xl border p-4 sm:p-5 shadow-sm transition-colors duration-200 ${containerClass}`}
             >
+
                 <div className="mb-5">
+
                     <input
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
@@ -184,73 +235,198 @@ const TodoContent = () => {
                         className={`w-full h-12 px-4 rounded-lg border outline-none shadow-sm focus:ring-2 transition ${inputClass}`}
                     />
 
-                    <div className="grid grid-cols-3 gap-2 mt-4">
-                        {[
-                            {
-                                value: "all",
-                                label: "All"
-                            },
-                            {
-                                value: "pending",
-                                label: "Pending"
-                            },
-                            {
-                                value: "completed",
-                                label: "Completed"
-                            }
-                        ].map((item) => (
+
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mt-4">
+
+                        <div className="grid grid-cols-3 gap-2">
+
+                            {[
+                                {
+                                    value: "all",
+                                    label: "All"
+                                },
+                                {
+                                    value: "pending",
+                                    label: "Pending"
+                                },
+                                {
+                                    value: "completed",
+                                    label: "Completed"
+                                }
+                            ].map((item) => (
+
+                                <button
+                                    key={item.value}
+                                    type="button"
+                                    onClick={() => setFilter(item.value)}
+                                    className={`h-10 px-5 rounded-lg text-sm font-medium transition ${filter === item.value
+                                            ? "bg-indigo-600 text-white shadow-sm"
+                                            : isDark
+                                                ? "bg-[#20252b] text-slate-400 hover:bg-slate-800 hover:text-slate-200 border border-slate-700"
+                                                : "bg-white text-slate-500 hover:bg-slate-50 hover:text-slate-900 border border-slate-200"
+                                        }`}
+                                >
+                                    {item.label}
+                                </button>
+
+                            ))}
+
+                        </div>
+
+
+                        <div className="relative">
+
                             <button
-                                key={item.value}
                                 type="button"
-                                onClick={() => setFilter(item.value)}
-                                className={`h-10 rounded-lg text-sm font-medium transition ${
-                                    filter === item.value
-                                        ? "bg-indigo-600 text-white shadow-sm"
-                                        : isDark
-                                            ? "bg-[#20252b] text-slate-400 hover:bg-slate-800 hover:text-slate-200 border border-slate-700"
-                                            : "bg-white text-slate-500 hover:bg-slate-50 hover:text-slate-900 border border-slate-200"
-                                }`}
+                                onClick={() => setShowSortMenu((prev) => !prev)}
+                                className={`h-10 px-4 rounded-lg border flex items-center justify-center gap-2 text-sm font-medium transition ${isDark
+                                        ? "bg-[#20252b] border-slate-700 text-slate-300 hover:bg-slate-800"
+                                        : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50"
+                                    }`}
                             >
-                                {item.label}
+
+                                <span>
+                                    Sort: {sortLabels[sort]}
+                                </span>
+
+                                <ChevronDown
+                                    size={17}
+                                    className={`transition-transform duration-200 ${showSortMenu ? "rotate-180" : ""
+                                        }`}
+                                />
+
                             </button>
-                        ))}
+
+
+                            <div
+                                className={`absolute right-0 top-12 z-30 w-52 rounded-xl border shadow-lg overflow-hidden transform origin-top-right transition-all duration-200 ${showSortMenu
+                                        ? "opacity-100 scale-100 translate-y-0 pointer-events-auto"
+                                        : "opacity-0 scale-95 -translate-y-2 pointer-events-none"
+                                    } ${isDark
+                                        ? "bg-[#20252b] border-slate-700"
+                                        : "bg-white border-slate-200"
+                                    }`}
+                            >
+
+                                <button
+                                    type="button"
+                                    onClick={() => handleSortChange("newest")}
+                                    className={`w-full px-4 py-3 text-left text-sm flex items-center justify-between transition ${isDark
+                                            ? "text-slate-200 hover:bg-slate-800"
+                                            : "text-slate-700 hover:bg-slate-50"
+                                        }`}
+                                >
+
+                                    <span>
+                                        Newest
+                                    </span>
+
+                                    {sort === "newest" && (
+                                        <Check
+                                            size={17}
+                                            className="text-indigo-500"
+                                        />
+                                    )}
+
+                                </button>
+
+
+                                <button
+                                    type="button"
+                                    onClick={() => handleSortChange("oldest")}
+                                    className={`w-full px-4 py-3 text-left text-sm flex items-center justify-between transition ${isDark
+                                            ? "text-slate-200 hover:bg-slate-800"
+                                            : "text-slate-700 hover:bg-slate-50"
+                                        }`}
+                                >
+
+                                    <span>
+                                        Oldest
+                                    </span>
+
+                                    {sort === "oldest" && (
+                                        <Check
+                                            size={17}
+                                            className="text-indigo-500"
+                                        />
+                                    )}
+
+                                </button>
+
+
+                                <button
+                                    type="button"
+                                    onClick={() => handleSortChange("completed")}
+                                    className={`w-full px-4 py-3 text-left text-sm flex items-center justify-between transition ${isDark
+                                            ? "text-slate-200 hover:bg-slate-800"
+                                            : "text-slate-700 hover:bg-slate-50"
+                                        }`}
+                                >
+
+                                    <span>
+                                        Completed first
+                                    </span>
+
+                                    {sort === "completed" && (
+                                        <Check
+                                            size={17}
+                                            className="text-indigo-500"
+                                        />
+                                    )}
+
+                                </button>
+
+                            </div>
+
+                        </div>
+
                     </div>
+
                 </div>
 
+
                 <TodoCard
-                    filteredTodosArray={filteredTodos}
+                    filteredTodosArray={sortedTodos}
                     onEdit={handleEdit}
                     onDelete={handleDeleteClick}
                     onToggle={handleToggle}
                 />
 
+
                 {showEditTodo && (
+
                     <div
-                        className={`fixed inset-0 z-50 flex items-center justify-center px-4 backdrop-blur-md ${
-                            isDark
+                        className={`fixed inset-0 z-50 flex items-center justify-center px-4 backdrop-blur-md ${isDark
                                 ? "bg-slate-950/75"
                                 : "bg-slate-900/40"
-                        }`}
+                            }`}
                     >
+
                         <div
                             className={`w-full max-w-[680px] rounded-2xl shadow-2xl p-6 sm:p-8 ${modalClass}`}
                         >
+
                             <div className="flex items-start justify-between mb-7">
+
                                 <div className="flex items-center gap-3">
+
                                     <div
-                                        className={`flex h-10 w-10 items-center justify-center rounded-lg ${
-                                            isDark
+                                        className={`flex h-10 w-10 items-center justify-center rounded-lg ${isDark
                                                 ? "bg-indigo-500/10 text-indigo-400"
                                                 : "bg-indigo-50 text-indigo-600"
-                                        }`}
+                                            }`}
                                     >
+
                                         <ListPlus
                                             size={21}
                                             strokeWidth={2}
                                         />
+
                                     </div>
 
+
                                     <div>
+
                                         <h2
                                             className={`text-xl sm:text-2xl font-semibold ${headingClass}`}
                                         >
@@ -262,29 +438,35 @@ const TodoContent = () => {
                                         >
                                             Update the details of your todo.
                                         </p>
+
                                     </div>
+
                                 </div>
+
 
                                 <button
                                     type="button"
                                     onClick={handleCloseEdit}
                                     aria-label="Close"
-                                    className={`flex h-9 w-9 items-center justify-center rounded-lg transition ${
-                                        isDark
+                                    className={`flex h-9 w-9 items-center justify-center rounded-lg transition ${isDark
                                             ? "text-slate-500 hover:text-slate-200 hover:bg-slate-800"
                                             : "text-slate-400 hover:text-slate-700 hover:bg-slate-100"
-                                    }`}
+                                        }`}
                                 >
                                     <X size={20} />
                                 </button>
+
                             </div>
 
+
                             <div>
+
                                 <label
                                     className={`block text-sm font-medium mb-2 ${labelClass}`}
                                 >
                                     Title <span className="text-red-500">*</span>
                                 </label>
+
 
                                 <input
                                     type="text"
@@ -296,14 +478,18 @@ const TodoContent = () => {
                                     autoFocus
                                     className={`w-full h-12 px-4 rounded-lg border outline-none shadow-sm focus:ring-2 transition ${inputClass}`}
                                 />
+
                             </div>
 
+
                             <div className="mt-5">
+
                                 <label
                                     className={`block text-sm font-medium mb-2 ${labelClass}`}
                                 >
                                     Description
                                 </label>
+
 
                                 <textarea
                                     value={editDescription}
@@ -315,32 +501,35 @@ const TodoContent = () => {
                                     className={`w-full px-4 py-3 rounded-lg border outline-none resize-none shadow-sm focus:ring-2 transition ${inputClass}`}
                                 />
 
+
                                 <p
                                     className={`mt-1.5 text-xs ${mutedClass}`}
                                 >
                                     Add enough detail so you know exactly what
                                     needs to be done.
                                 </p>
+
                             </div>
 
+
                             <div
-                                className={`mt-7 pt-5 border-t flex flex-col-reverse sm:flex-row sm:justify-end items-stretch sm:items-center gap-3 ${
-                                    isDark
+                                className={`mt-7 pt-5 border-t flex flex-col-reverse sm:flex-row sm:justify-end items-stretch sm:items-center gap-3 ${isDark
                                         ? "border-slate-800"
                                         : "border-slate-100"
-                                }`}
+                                    }`}
                             >
+
                                 <button
                                     type="button"
                                     onClick={handleCloseEdit}
-                                    className={`px-5 py-2.5 font-medium rounded-lg border transition ${
-                                        isDark
+                                    className={`px-5 py-2.5 font-medium rounded-lg border transition ${isDark
                                             ? "text-slate-300 bg-transparent border-slate-700 hover:bg-slate-800"
                                             : "text-slate-700 bg-white border-slate-300 hover:bg-slate-50"
-                                    }`}
+                                        }`}
                                 >
                                     Cancel
                                 </button>
+
 
                                 <button
                                     type="button"
@@ -350,30 +539,38 @@ const TodoContent = () => {
                                 >
                                     Update Todo
                                 </button>
+
                             </div>
+
                         </div>
+
                     </div>
+
                 )}
 
+
                 {showDeleteBar && (
+
                     <div
-                        className={`fixed inset-0 z-50 flex items-center justify-center px-4 backdrop-blur-md ${
-                            isDark
+                        className={`fixed inset-0 z-50 flex items-center justify-center px-4 backdrop-blur-md ${isDark
                                 ? "bg-slate-950/75"
                                 : "bg-slate-900/40"
-                        }`}
+                            }`}
                     >
+
                         <div
                             className={`w-full max-w-[420px] rounded-2xl shadow-2xl p-6 ${modalClass}`}
                         >
+
                             <div className="flex items-start gap-4">
+
                                 <div
-                                    className={`w-11 h-11 rounded-full flex items-center justify-center shrink-0 ${
-                                        isDark
+                                    className={`w-11 h-11 rounded-full flex items-center justify-center shrink-0 ${isDark
                                             ? "bg-red-500/10"
                                             : "bg-red-100"
-                                    }`}
+                                        }`}
                                 >
+
                                     <Trash2
                                         size={22}
                                         className={
@@ -382,14 +579,18 @@ const TodoContent = () => {
                                                 : "text-red-600"
                                         }
                                     />
+
                                 </div>
 
+
                                 <div>
+
                                     <h2
                                         className={`text-xl font-semibold ${headingClass}`}
                                     >
                                         Delete Todo?
                                     </h2>
+
 
                                     <p
                                         className={`mt-2 text-sm leading-5 ${mutedClass}`}
@@ -397,21 +598,25 @@ const TodoContent = () => {
                                         Are you sure you want to delete this
                                         todo? This action cannot be undone.
                                     </p>
+
                                 </div>
+
                             </div>
 
+
                             <div className="flex justify-end gap-3 mt-7">
+
                                 <button
                                     type="button"
                                     onClick={handleCloseDelete}
-                                    className={`px-5 py-2.5 font-medium rounded-lg border transition ${
-                                        isDark
+                                    className={`px-5 py-2.5 font-medium rounded-lg border transition ${isDark
                                             ? "text-slate-300 border-slate-700 hover:bg-slate-800"
                                             : "text-slate-700 border-slate-300 hover:bg-slate-50"
-                                    }`}
+                                        }`}
                                 >
                                     Cancel
                                 </button>
+
 
                                 <button
                                     type="button"
@@ -420,13 +625,20 @@ const TodoContent = () => {
                                 >
                                     Delete
                                 </button>
+
                             </div>
+
                         </div>
+
                     </div>
+
                 )}
+
             </div>
+
         </div>
     )
 }
+
 
 export default TodoContent
